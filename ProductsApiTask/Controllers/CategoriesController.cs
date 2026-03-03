@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ProductsApiTask.Data;
 using ProductsApiTask.Models;
-using ProductsApiTask.DTO;  // Shto këtë
+using ProductsApiTask.DTO; 
 
 namespace ProductsApiTask.Controllers
 {

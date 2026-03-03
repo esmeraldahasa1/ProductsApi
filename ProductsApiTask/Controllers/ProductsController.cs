@@ -45,7 +45,7 @@ namespace ProductsApiTask.Controllers
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
-            // Verifiko që kategoria ekziston
+            // Verifikim qe kategoria ekziston
             var category = await _context.Categories.FindAsync(product.CategoryID);
             if (category == null)
             {
