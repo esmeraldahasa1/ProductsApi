@@ -21,7 +21,11 @@ namespace ProductsApiTask.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetAll()
         {
-            return Ok(await _context.Products.ToListAsync());
+            var products = await _context.Products
+                .Include(p => p.Category)
+                .ToListAsync();
+
+            return Ok(products);
         }
 
         // GET BY ID

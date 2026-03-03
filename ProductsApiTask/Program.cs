@@ -3,14 +3,16 @@ using ProductsApiTask.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
 var app = builder.Build();
 
-// Konfigurojme connection string per AppDbContext dhe e regjistrojme ne DI container te ASP.NET Core
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -20,4 +22,5 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();
