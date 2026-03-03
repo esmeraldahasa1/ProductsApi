@@ -14,20 +14,15 @@ namespace ProductsApiTask.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Precision per Cmimi
-            modelBuilder.Entity<Product>()
-                .Property(p => p.Cmimi)
-                .HasPrecision(18, 2);
+            base.OnModelCreating(modelBuilder); 
+            modelBuilder.Entity<Product>().Property(p => p.Cmimi) .HasPrecision(18, 2);
 
-            // Relationship 1 Category -> Many Products
+            // Konfigurimi i mardheniesise ndermjet Product dhe Category
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.Category)
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryID)
-                .OnDelete(DeleteBehavior.Restrict);
-            // nuk lejon fshirjen e kategorise nese ka produkte
-
-            base.OnModelCreating(modelBuilder);
+                .OnDelete(DeleteBehavior.Cascade); //Fshihet produkti ne momentin qe fshihet kategoria
         }
     }
 }

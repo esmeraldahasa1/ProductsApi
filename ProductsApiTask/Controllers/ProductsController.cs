@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using ProductsApiTask.Data;
 using ProductsApiTask.Models;
 
-// RESTful API Controller per te menaxhuar produktet (CRUD - Create, Read, Update, Delete)
 namespace ProductsApiTask.Controllers
 {
     [Route("api/[controller]")]
@@ -17,64 +16,97 @@ namespace ProductsApiTask.Controllers
             _context = context;
         }
 
-        // GET ALL
+        // GET: api/Products
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetAll()
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
-            var products = await _context.Products
+            return await _context.Products
                 .Include(p => p.Category)
                 .ToListAsync();
-
-            return Ok(products);
         }
 
-        // GET BY ID
+        // GET: api/Products/id
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetById(int id)
+        public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _context.Products
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(p => p.ID == id);
 
             if (product == null)
+            {
                 return NotFound();
+            }
 
-            return Ok(product);
+            return product;
         }
 
-        // POST
+        // POST: api/Products
         [HttpPost]
-        public async Task<ActionResult<Product>> Create(Product product)
+        public async Task<ActionResult<Product>> PostProduct(Product product)
         {
+            // Verifiko që kategoria ekziston
+            var category = await _context.Categories.FindAsync(product.CategoryID);
+            if (category == null)
+            {
+                return BadRequest("Kategoria nuk ekziston");
+            }
+
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetById), new { id = product.ID }, product);
+            return CreatedAtAction(nameof(GetProduct), new { id = product.ID }, product);
         }
 
-        // PUT
+        // PUT: api/Products/id
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Product product)
+        public async Task<IActionResult> PutProduct(int id, Product product)
         {
             if (id != product.ID)
+            {
                 return BadRequest();
+            }
 
             _context.Entry(product).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ProductExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
             return NoContent();
         }
 
-        // DELETE
+        // DELETE: api/Products/id
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteProduct(int id)
         {
             var product = await _context.Products.FindAsync(id);
             if (product == null)
+            {
                 return NotFound();
+            }
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        private bool ProductExists(int id)
+        {
+            return _context.Products.Any(e => e.ID == id);
         }
     }
 }
