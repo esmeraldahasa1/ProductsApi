@@ -17,14 +17,30 @@ namespace ProductsApiTask.Controllers
         }
 
         // GET: api/Products
+        // GET: api/Products
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        public async Task<IActionResult> GetProducts(int pageNumber = 1, int pageSize = 50)
         {
-            return await _context.Products
-                .Include(p => p.Category)
-                .ToListAsync();
-        }
+            
+            if (pageSize > 100)
+                pageSize = 100;
 
+            // Numri total i produkteve
+            var totalCount = await _context.Products.CountAsync();
+
+           
+            var products = await _context.Products.Include(p => p.Category).Skip(pageNumber * pageSize).Take(pageSize).ToListAsync();
+
+            // Kthe rezultatet 
+            return Ok(new
+            {
+                totalCount,
+                pageNumber,
+                pageSize,
+                data = products
+            });
+
+        }
         // GET: api/Products/id
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
